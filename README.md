@@ -4,9 +4,9 @@
 
 [![License: MIT](https://img.shields.io/github/license/vcjdeboer/v1b1-skills)](LICENSE)
 [![Latest release](https://img.shields.io/github/v/release/vcjdeboer/v1b1-skills)](https://github.com/vcjdeboer/v1b1-skills/releases)
-[![Release downloads](https://img.shields.io/github/downloads/vcjdeboer/v1b1-skills/total)](https://github.com/vcjdeboer/v1b1-skills/releases)
 [![Stars](https://img.shields.io/github/stars/vcjdeboer/v1b1-skills?style=flat)](https://github.com/vcjdeboer/v1b1-skills/stargazers)
 [![Last commit](https://img.shields.io/github/last-commit/vcjdeboer/v1b1-skills)](https://github.com/vcjdeboer/v1b1-skills/commits/main)
+[![Built with spec-kit](https://img.shields.io/badge/built%20with-spec--kit-blue)](https://github.com/github/spec-kit)
 
 A trio of [Claude Code](https://claude.com/claude-code) skills for contributors writing PyLabRobot device backends against the **v1b1 capability-architecture** patterns — the architecture set out by Rick Wierenga (PyLabRobot creator) in `creating-capabilities.md` and made concrete in the merged device backends contributed by the PLR community over many PRs.
 
