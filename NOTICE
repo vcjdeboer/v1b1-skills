@@ -1,0 +1,17 @@
+v1b1-skills
+Copyright (c) 2026 v1b1-skills contributors
+
+This product includes a vendored copy of `creating-capabilities.md` from
+PyLabRobot (https://github.com/PyLabRobot/pylabrobot), authored by Rick
+Wierenga and contributors and distributed under the MIT License.
+
+The vendored copy lives at:
+
+    v1b1-capability/creating-capabilities.md
+
+It is byte-identical to the upstream source at the commit recorded in
+`v1b1-capability/reference.md` frontmatter (`verified_against` field) and is
+refreshed on each audit run. See `v1b1-capability/audit.md` for the parity
+check procedure.
+
+Upstream PyLabRobot license: https://github.com/PyLabRobot/pylabrobot/blob/main/LICENSE

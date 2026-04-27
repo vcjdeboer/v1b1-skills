@@ -1,0 +1,127 @@
+# OpenAPI 3.0 subset for the Opentrons Flex HTTP API — 4-endpoint smoke fixture.
+# Source upstream: https://docs.opentrons.com/openapi/v3.0 (Aspirate, Dispense,
+# PickUpTip, DropTip command schemas under POST /runs/{run_id}/commands).
+# Pinned 2026-04-25; the upstream spec evolves and this snippet is a stable test
+# fixture, not a live mirror.
+openapi: 3.0.3
+info:
+  title: Opentrons Flex HTTP API (smoke fixture subset)
+  version: "v3.0-fixture-2026-04-25"
+servers:
+  - url: http://{host}:31950
+    variables:
+      host:
+        default: 192.168.1.100
+paths:
+  /runs/{run_id}/commands:
+    post:
+      summary: Queue a command on the run.
+      description: Queues a command on the run; returns immediately with the command id. Actual execution runs asynchronously and is polled via GET /runs/{run_id}/commands/{id} until status is terminal.
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/AspirateCommand'
+                - $ref: '#/components/schemas/DispenseCommand'
+                - $ref: '#/components/schemas/PickUpTipCommand'
+                - $ref: '#/components/schemas/DropTipCommand'
+      responses:
+        '201':
+          description: Command queued.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CommandResponse' }
+components:
+  schemas:
+    WellLocationOffset:
+      type: object
+      properties:
+        x: { type: number, format: float, description: "mm" }
+        y: { type: number, format: float, description: "mm" }
+        z: { type: number, format: float, description: "mm" }
+    WellLocation:
+      type: object
+      properties:
+        origin: { type: string, enum: [top, bottom, meniscus] }
+        offset: { $ref: '#/components/schemas/WellLocationOffset' }
+    AspirateCommand:
+      x-operationId: aspirate
+      x-summary: "Queues an aspirate command on the run; returns immediately with the command id. Actual aspiration runs asynchronously and is polled via GET /runs/{run_id}/commands/{id} until status is terminal."
+      type: object
+      required: [commandType, params]
+      properties:
+        commandType: { type: string, enum: [aspirate] }
+        params:
+          type: object
+          required: [pipetteId, labwareId, wellName, wellLocation, flowRate, volume]
+          properties:
+            pipetteId: { type: string, format: uuid, description: "id of mounted pipette returned from GET /instruments" }
+            labwareId: { type: string, format: uuid, description: "id of source labware (assigned at run setup)" }
+            wellName: { type: string, description: "well coordinate, e.g. A1" }
+            wellLocation: { $ref: '#/components/schemas/WellLocation' }
+            flowRate: { type: number, format: float, description: "μL/sec" }
+            volume: { type: number, format: float, description: "μL" }
+    DispenseCommand:
+      x-operationId: dispense
+      x-summary: "Queues a dispense command on the run; returns immediately with the command id. Actual dispense runs asynchronously and is polled until status is terminal."
+      type: object
+      required: [commandType, params]
+      properties:
+        commandType: { type: string, enum: [dispense] }
+        params:
+          type: object
+          required: [pipetteId, labwareId, wellName, wellLocation, flowRate, volume]
+          properties:
+            pipetteId: { type: string, format: uuid }
+            labwareId: { type: string, format: uuid }
+            wellName: { type: string }
+            wellLocation: { $ref: '#/components/schemas/WellLocation' }
+            flowRate: { type: number, format: float, description: "μL/sec" }
+            volume: { type: number, format: float, description: "μL" }
+    PickUpTipCommand:
+      x-operationId: pickUpTip
+      x-summary: "Queues a pick-up-tip command on the run; the pipette is moved to the tip rack well and the tip is engaged. Async polling required."
+      type: object
+      required: [commandType, params]
+      properties:
+        commandType: { type: string, enum: [pickUpTip] }
+        params:
+          type: object
+          required: [pipetteId, labwareId, wellName]
+          properties:
+            pipetteId: { type: string, format: uuid }
+            labwareId: { type: string, format: uuid, description: "id of tip rack" }
+            wellName: { type: string, description: "tip-rack well, e.g. A1" }
+            wellLocation: { $ref: '#/components/schemas/WellLocation' }
+    DropTipCommand:
+      x-operationId: dropTip
+      x-summary: "Queues a drop-tip command on the run; the pipette is moved to the destination and the tip is ejected. Async polling required."
+      type: object
+      required: [commandType, params]
+      properties:
+        commandType: { type: string, enum: [dropTip] }
+        params:
+          type: object
+          required: [pipetteId, labwareId, wellName]
+          properties:
+            pipetteId: { type: string, format: uuid }
+            labwareId: { type: string, format: uuid, description: "id of trash or tip rack" }
+            wellName: { type: string }
+            wellLocation: { $ref: '#/components/schemas/WellLocation' }
+    CommandResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id: { type: string, format: uuid, description: "command id for status polling" }
+            status: { type: string, enum: [queued, running, succeeded, failed], description: "terminal states are succeeded / failed" }
+            completedAt: { type: string, format: date-time, nullable: true, description: "populated when status terminal" }
+            error: { type: object, nullable: true, description: "error.errorType + error.detail when status = failed" }

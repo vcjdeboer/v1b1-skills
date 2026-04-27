@@ -1,0 +1,80 @@
+# Template: device.py.tmpl
+# Used in form: complex
+# Instantiated: once per device
+# Placeholders:
+#   <Vendor>             - vendor name (PascalCase)
+#   <Device>             - device name (PascalCase)
+#   <vendor_lower>       - vendor name (snake_case lowercase)
+#   <device_snake>       - device name (snake_case)
+#   <capability_imports> - imports for Capability frontends from pylabrobot.capabilities.*
+#   <backend_imports>    - imports for the concrete <Vendor><Device><Capability>Backend classes
+#   <helper_imports>     - imports for helper subsystem classes (may be empty)
+#   <capability_wiring>  - Device.__init__ wiring lines (one per Capability)
+#   <helper_wiring>      - Device.__init__ wiring lines for helpers (may be empty)
+#   <capabilities_list>  - the contents of self._capabilities list literal
+#   <resource_inheritance> - "Resource, " prefix for class declaration if resource_integration=true; else empty
+#   <resource_init>      - Resource.__init__(self, name=..., size_x=..., size_y=..., size_z=..., ...) call if resource_integration=true; else empty
+#   <resource_imports>   - import lines for the Resource type if resource_integration=true; else empty
+# Invariants enforced by construction:
+#   - P-06: contains exactly one Device subclass
+#   - P-13: __init__ constructs ONE driver, then constructs each Backend(driver), wires _capabilities
+#   - P-07: _capabilities is a list (not dict); lifecycle ordering left to base Device.setup/stop
+#   - P-23: <resource_inheritance> + <resource_init> emit multiple inheritance + dual __init__ when resource_integration=true; else single inheritance Device
+#   - Capability-bypass guard: # CAUTION: comment block above the constructor warning
+#     against Device convenience methods bypassing the Capability layer (Echo F5 wrong default)
+# Reference: ~/.claude/skills/v1b1-capability/reference.md sections P-06, P-07, P-13, P-23
+# Structural model: pylabrobot/qinstruments/bioshake.py:278+ (PlateHolder + Device);
+#                   pylabrobot/tecan/infinite/infinite.py:19-78 (Resource + Device + HasLoadingTray triple)
+
+"""<Vendor> <Device> device class."""
+
+from __future__ import annotations
+
+from pylabrobot.device import Device
+<resource_imports>
+<capability_imports>
+<backend_imports>
+<helper_imports>
+from .driver import <Vendor><Device>Driver
+
+
+# CAUTION (FOR THE PROTOCOL-IMPLEMENTATION PHASE):
+#
+# Three wrong defaults the protocol-implementation phase tends to drift into. Each one is
+# documented in the v1b1 review-skill run-doc trail; cite-chase before re-introducing.
+#
+# (a) Capability-named methods on the Driver (P-01 — driver-mirrors-capability)
+#     The Driver stays generic transport — its public surface is the chosen P-21 form
+#     (send_command / _request / _call_sdk / etc.). Adding aspirate/lock/scan_rack/etc.
+#     to the Driver creates a same-named-method collision with the Backend.
+#     Documented in: PR #1009 (Micronic) Finding 1; Echo branch Finding 1 (8-method collision).
+#
+# (b) Workflow on the Capability frontend (P-20 — workflow-on-Backend)
+#     Multi-step orchestration (trigger → poll → fetch, retry, or blocking-call sequencing)
+#     belongs on the Backend, NEVER on the Capability frontend. The Capability frontend stays
+#     a thin @need_capability_ready forward so different backends can pick different
+#     completion strategies (polling, callbacks, blocking calls).
+#     Documented in: PR #1009 (Micronic) Finding 2; Echo branch Finding 3 — same contributor.
+#
+# (c) Capability bypass via Device convenience methods (P-02 / P-06)
+#     Convenience methods on this Device that map to a Capability operation MUST go through
+#     self.<capability>.<method>, NEVER through self.driver.<method>.
+#     - Genuinely device-level (e.g., serial-number query, firmware version): self.driver — OK
+#     - Capability-shaped (e.g., "is plate present?"): self.<capability>.<method> — REQUIRED
+#     If a Capability operation has no Capability-frontend method, the right shape is to add
+#     one to the Capability + Backend ABC, not to expose it on the Device alone.
+#     Documented in: Echo branch Finding 5.
+
+class <Vendor><Device>(<resource_inheritance>Device):
+  """<Vendor> <Device> device frontend."""
+
+  def __init__(self, host: str, port: int):
+    driver = <Vendor><Device>Driver(host=host, port=port)
+<resource_init>
+    Device.__init__(self, driver=driver)
+    self.driver: <Vendor><Device>Driver = driver
+
+<capability_wiring>
+<helper_wiring>
+
+    self._capabilities = [<capabilities_list>]

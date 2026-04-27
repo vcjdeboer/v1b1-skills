@@ -1,0 +1,53 @@
+# Template: chatterbox_driver.py.tmpl
+# Used in form: discovery=true (P-04 documented exception)
+# Instantiated: once per device when discovery=true
+# Placeholders:
+#   <Vendor>             - vendor name (PascalCase)
+#   <Device>             - device name (PascalCase)
+#   <discovery_defaults> - default values to substitute for the discovery output (so chatterbox skips runtime probes)
+# Invariants enforced by construction:
+#   - P-04 documented exception: extends <Vendor><Device>Driver (NOT a CapabilityBackend)
+#   - Docstring states the rationale: "applies because this driver does runtime discovery in setup()"
+#   - File never co-inherits CapabilityBackend (the standard chatterbox form lives in chatterbox.py.tmpl)
+# Reference: ~/.claude/skills/v1b1-capability/reference.md section P-04 (Inconsistency note)
+# Structural model: pylabrobot/hamilton/liquid_handlers/nimbus/chatterbox.py:18 — NimbusChatterboxDriver(NimbusDriver)
+
+"""<Vendor> <Device> chatterbox driver — device-free testing for a discovery-using device.
+
+Documented P-04 exception: this driver class extends the <Vendor><Device>Driver itself rather
+than a CapabilityBackend, because the standard chatterbox form cannot fake the runtime discovery
+that <Vendor><Device>Driver.setup() performs. Substitutes pre-built defaults for the discovery
+output so backends can be wired without a real device.
+
+For drivers that do NOT do discovery, use the standard chatterbox form (chatterbox.py.tmpl).
+"""
+
+from __future__ import annotations
+
+from typing import Optional
+
+from pylabrobot.capabilities.capability import BackendParams
+
+from .driver import <Vendor><Device>Driver
+
+
+class <Vendor><Device>ChatterboxDriver(<Vendor><Device>Driver):
+  """Chatterbox-mode driver for the <Vendor> <Device>.
+
+  Substitutes pre-built defaults for the discovery output that the real driver's setup()
+  would normally probe. The Device class wires this driver instead of the real one when
+  the contributor passes chatterbox=True at construction time.
+  """
+
+  def __init__(self, host: str = "chatterbox", port: int = 0):
+    super().__init__(host=host, port=port)
+
+  async def setup(self, backend_params: Optional[BackendParams] = None) -> None:
+    # TODO: substitute pre-built defaults for the discovery output. Do NOT call the real
+    # discovery routines from <Vendor><Device>Driver.setup(); the whole point of the
+    # chatterbox is to skip them.
+    # <discovery_defaults>
+    pass
+
+  async def stop(self) -> None:
+    pass

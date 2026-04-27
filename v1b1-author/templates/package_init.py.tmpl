@@ -1,0 +1,19 @@
+# Template: package_init.py.tmpl
+# Used in form: complex
+# Instantiated: once per device package
+# Placeholders:
+#   <driver_import>     - "from .driver import <Vendor><Device>Driver"
+#   <backend_imports>   - one per Capability: "from .<capability_snake>_backend import <Vendor><Device><Capability>Backend"
+#   <helper_imports>    - one per HelperChoice: "from .<helper_snake> import <HelperName>"
+#   <device_import>     - "from .<device_snake> import <Vendor><Device>"
+#   <chatterbox_import> - either "from .chatterbox import ..." (standard) or "from .chatterbox_driver import ..." (exception)
+# Invariants enforced by construction:
+#   - All re-exports use relative imports (no circular import risk)
+#   - One import per top-level class in the package
+#   - Driver, every Backend, every Helper, the Device, and the chatterbox class are all re-exported
+
+<driver_import>
+<backend_imports>
+<helper_imports>
+<device_import>
+<chatterbox_import>

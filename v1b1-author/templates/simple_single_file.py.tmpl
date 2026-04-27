@@ -1,0 +1,77 @@
+# Template: simple_single_file.py.tmpl
+# Used in form: simple
+# Instantiated: once per device (entire device in one file)
+# Placeholders:
+#   <Vendor>            - vendor name (PascalCase)
+#   <Device>            - device name (PascalCase)
+#   <vendor_lower>      - vendor name (snake_case lowercase) — used in module path
+#   <device_snake>      - device name (snake_case)
+#   <Capability>        - Capability frontend class name (e.g., Shaker)
+#   <CapabilityBackend> - Backend ABC class name (e.g., ShakerBackend)
+#   <capability_snake>  - Capability name (snake_case) — used for attribute name
+#   <abstract_methods>  - newline-joined abstract method stubs with # TODO markers
+#   <transport_method>  - chosen P-21 transport form
+#   <setup_params_block> - nested SetupParams class + isinstance-check block (may be empty)
+#   <capability_imports> - imports for Capability frontends + Backend ABCs
+#   <capability_wiring>  - Device.__init__ wiring lines
+# Invariants enforced by construction:
+#   - P-06 four-layer: file contains exactly one Driver subclass, 1+ CapabilityBackend subclasses, 1 Device subclass
+#   - P-08: Driver named <Vendor><Device>Driver
+#   - P-09: each Backend named <Vendor><Device><Capability>Backend
+#   - P-13: single Driver instance shared across Backends in Device.__init__
+#   - P-01: Driver class body contains NO method whose name matches any Capability operation
+#   - P-22 / P-27: if SetupParams block non-empty, nested inside Driver; setup signature uses backend_params: Optional[BackendParams] = None
+#   - P-02: backends use _on_setup / _on_stop, NEVER setup / stop
+#   - P-05: each Backend stores self.driver = driver
+# Reference: ~/.claude/skills/v1b1-capability/reference.md sections P-06, P-08, P-09, P-13, P-22, P-27
+# Structural model: pylabrobot/qinstruments/bioshake.py at v1b1 d3c6d0a5
+
+"""<Vendor> <Device> device — single-file scaffold."""
+
+from __future__ import annotations
+
+from typing import Optional
+
+from pylabrobot.capabilities.capability import BackendParams
+from pylabrobot.device import Device, Driver
+<capability_imports>
+
+
+class <Vendor><Device>Driver(Driver):
+  """Driver for the <Vendor> <Device>.
+
+  Generic transport only — never adds Capability-named methods.
+  Per-Capability protocol encoding lives in the Backend(s) below.
+  """
+
+<setup_params_block>
+  def __init__(self, port: str):
+    super().__init__()
+    self.port = port
+    # TODO: connection state (e.g., serial port handle)
+
+  async def setup(self, backend_params: Optional[BackendParams] = None) -> None:
+    # TODO: open the connection. Capability-specific init lives in Backend._on_setup.
+    pass
+
+  async def stop(self) -> None:
+    # TODO: close the connection.
+    pass
+
+<transport_method>
+
+
+<abstract_methods>
+
+
+class <Vendor><Device>(Device):
+  """<Vendor> <Device> device frontend."""
+
+  def __init__(self, port: str):
+    driver = <Vendor><Device>Driver(port=port)
+    super().__init__(driver=driver)
+    self.driver: <Vendor><Device>Driver = driver
+    # CAUTION: Convenience methods on this Device that map to a Capability operation
+    # MUST go through self.<capability>.<method>, NEVER through self.driver.<method>.
+    # Wrong default: capability bypass.
+<capability_wiring>

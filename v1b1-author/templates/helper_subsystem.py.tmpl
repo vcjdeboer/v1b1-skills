@@ -1,0 +1,45 @@
+# Template: helper_subsystem.py.tmpl
+# Used in form: either form (P-16 device-specific helper)
+# Instantiated: 0..N (one per HelperChoice)
+# Placeholders:
+#   <Vendor>            - vendor name (PascalCase)
+#   <HelperName>        - helper class name (PascalCase, includes "Backend" suffix per recommendation)
+#   <helper_snake>      - helper name (snake_case)
+#   <helper_methods>    - newline-joined method stubs (contributor-named, with # TODO markers)
+# Invariants enforced by construction:
+#   - P-16: plain class (no inheritance from CapabilityBackend)
+#   - Lifecycle hooks _on_setup / _on_stop present (even when no-op pass)
+#   - Class docstring contains canonical "STARCover pattern" phrasing
+#   - Naming: <Vendor><Helper>Backend per P-16 inconsistency-note recommendation for new code
+#     (legacy <Vendor><Helper> without suffix is accepted on existing helpers but template
+#     emits the recommended form)
+# Reference: ~/.claude/skills/v1b1-capability/reference.md section P-16
+# Structural model: pylabrobot/hamilton/liquid_handlers/star/cover.py and nimbus/door.py at v1b1 d3c6d0a5
+
+"""<HelperName> — device-specific helper subsystem."""
+
+from __future__ import annotations
+
+from .driver import <Vendor><Device>Driver
+
+
+class <HelperName>:
+  """<HelperName> — plain helper class (not a CapabilityBackend), following the STARCover pattern.
+
+  Device-specific subsystem with no Backend ABC (P-16). When a second device upstream needs
+  the same operation, this can be promoted to a Capability ABC + concrete Backend.
+  Until then, it stays attached to the driver as a plain helper with lifecycle hooks.
+  """
+
+  def __init__(self, driver: <Vendor><Device>Driver):
+    self.driver = driver
+
+  async def _on_setup(self) -> None:
+    # TODO: helper-specific init (if any). Pass is acceptable.
+    pass
+
+  async def _on_stop(self) -> None:
+    # TODO: helper-specific safety shutdown (if any). Pass is acceptable.
+    pass
+
+<helper_methods>

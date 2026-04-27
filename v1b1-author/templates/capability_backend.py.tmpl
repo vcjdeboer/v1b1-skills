@@ -1,0 +1,53 @@
+# Template: capability_backend.py.tmpl
+# Used in form: complex
+# Instantiated: once per Capability with kind == existing_implementation
+# Placeholders:
+#   <Vendor>            - vendor name (PascalCase)
+#   <Device>            - device name (PascalCase)
+#   <Capability>        - Capability frontend class name
+#   <CapabilityBackend> - Backend ABC class name
+#   <capability_snake>  - Capability name (snake_case) — used in import path
+#   <capability_module> - the pylabrobot.capabilities subpackage name (e.g., shaking, rack_reading)
+#   <abstract_methods>  - newline-joined abstract method stubs with # TODO markers
+# Invariants enforced by construction:
+#   - P-09: named <Vendor><Device><Capability>Backend
+#   - P-05: __init__(self, driver) stores self.driver = driver
+#   - P-02: lifecycle hooks named _on_setup / _on_stop, NEVER setup / stop
+#   - P-20: per-operation method bodies host workflow sequencing if multi-step;
+#           # TODO: build wire payload here markers placed inside method bodies
+#   - P-22: Capability-method signatures accept backend_params: Optional[BackendParams] = None
+#           where the Capability ABC defines such a parameter
+# Reference: ~/.claude/skills/v1b1-capability/reference.md sections P-02, P-05, P-09, P-20, P-22, P-25
+# Structural model: pylabrobot/hamilton/liquid_handlers/nimbus/pip_backend.py at v1b1 d3c6d0a5
+
+"""<Vendor> <Device> backend for the <Capability> capability."""
+
+from __future__ import annotations
+
+from typing import Optional
+
+from pylabrobot.capabilities.<capability_module> import <CapabilityBackend>
+from pylabrobot.capabilities.capability import BackendParams
+
+from .driver import <Vendor><Device>Driver
+
+
+class <Vendor><Device><Capability>Backend(<CapabilityBackend>):
+  """<Capability> backend backed by the <Vendor> <Device> protocol."""
+
+  def __init__(self, driver: <Vendor><Device>Driver):
+    super().__init__()
+    self.driver = driver
+
+  async def _on_setup(self, backend_params: Optional[BackendParams] = None) -> None:
+    # TODO: capability-specific post-connection init (e.g., calibration, sanity probe).
+    # The driver has already opened the connection by this point.
+    pass
+
+  async def _on_stop(self) -> None:
+    # TODO: capability-specific safety shutdown (if any).
+    # Per P-25 evidence (e.g., STARHead96Backend._on_stop): try/except per shutdown step
+    # so a failure of one doesn't block the others.
+    pass
+
+<abstract_methods>

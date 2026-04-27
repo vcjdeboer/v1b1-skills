@@ -1,0 +1,56 @@
+# Template: driver.py.tmpl
+# Used in form: complex
+# Instantiated: once per device
+# Placeholders:
+#   <Vendor>            - vendor name (PascalCase)
+#   <Device>            - device name (PascalCase)
+#   <transport_method>  - chosen P-21 transport form (snippet)
+#   <setup_params_block> - nested SetupParams class + isinstance-check (may be empty)
+#   <discovery_block>   - Driver.setup body fragment for runtime introspection (may be empty)
+# Invariants enforced by construction:
+#   - P-06: file contains exactly one Driver subclass
+#   - P-08: named <Vendor><Device>Driver
+#   - P-01: NO method whose name matches any Capability operation. The only methods
+#           on this class come from <transport_method>, <discovery_block>, lifecycle hooks,
+#           and <setup_params_block>. None are domain-named.
+#   - P-25: setup body is connection-open + optional discovery; capability-specific work NOT placed here
+#   - P-27: setup signature accepts backend_params: Optional[BackendParams] = None when SetupParams used;
+#           lighter form (no params) when not
+# Reference: ~/.claude/skills/v1b1-capability/reference.md sections P-06, P-08, P-21, P-25, P-27
+# Structural model: pylabrobot/hamilton/liquid_handlers/nimbus/driver.py at v1b1 d3c6d0a5
+
+"""<Vendor> <Device> driver — wire transport + optional discovery."""
+
+from __future__ import annotations
+
+from typing import Optional
+
+from pylabrobot.capabilities.capability import BackendParams
+from pylabrobot.device import Driver
+
+
+class <Vendor><Device>Driver(Driver):
+  """Driver for the <Vendor> <Device>.
+
+  Owns transport (opening connection, sending bytes / RPC calls, receiving responses).
+  Per-Capability protocol encoding lives in <Vendor><Device><Capability>Backend.
+  Same-named methods on driver and capability are an anti-pattern (P-01).
+  """
+
+<setup_params_block>
+  def __init__(self, host: str, port: int):
+    super().__init__()
+    self.host = host
+    self.port = port
+    # TODO: connection-state attributes (e.g., reader/writer for asyncio,
+    # http session for HTTP, sdk handle for SDK wrappers).
+
+  async def setup(self, backend_params: Optional[BackendParams] = None) -> None:
+    # TODO: open the connection.
+<discovery_block>
+
+  async def stop(self) -> None:
+    # TODO: close the connection. Best-effort cleanup of any in-flight state.
+    pass
+
+<transport_method>
