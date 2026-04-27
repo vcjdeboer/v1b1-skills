@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.png" alt="v1b1-skills logo" width="240"/>
+</p>
+
 # v1b1 Skills for Claude Code
 
 A trio of [Claude Code](https://claude.com/claude-code) skills for contributors writing PyLabRobot device backends against the **v1b1 capability-architecture** patterns — the architecture set out by Rick Wierenga (PyLabRobot creator) in `creating-capabilities.md` and made concrete in the merged device backends contributed by the PLR community over many PRs.
