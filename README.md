@@ -1,6 +1,6 @@
-<img src="logo.png" alt="v1b1-skills logo" align="right" width="200"/>
-
 # v1b1 Skills for Claude Code
+
+<img src="logo.png" alt="v1b1-skills logo" align="right" width="200"/>
 
 [![License: MIT](https://img.shields.io/github/license/vcjdeboer/v1b1-skills)](LICENSE)
 [![Latest release](https://img.shields.io/github/v/release/vcjdeboer/v1b1-skills)](https://github.com/vcjdeboer/v1b1-skills/releases)
